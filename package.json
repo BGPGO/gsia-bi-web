@@ -1,0 +1,15 @@
+{
+  "name": "gsia-bi-web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:data": "node build-data.cjs",
+    "build:jsx": "node build-jsx.cjs",
+    "build": "npm run build:data && npm run build:jsx",
+    "dev": "npm run build && start index.html"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5",
+    "esbuild": "^0.20.2"
+  }
+}
