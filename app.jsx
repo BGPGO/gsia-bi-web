@@ -700,13 +700,8 @@ const PageExecutivo = () => {
 
   return (
     <div className="page" style={{ position: 'relative' }}>
-      {/* Upsell banner */}
-      <div className="upsell-banner">
-        <Icon name="target" style={{ width: 24, height: 24, color: 'var(--cyan)', flexShrink: 0 }} />
-        <span>Desbloqueie o <b>GO BI IA Completo</b> — SLA inteligente, semáforo de vagas, turnover, postos descobertos e muito mais.</span>
-      </div>
 
-      <div className="upsell-blur">
+
       <div className="page-title">
         <div>
           <h1>Dashboard Executivo</h1>
@@ -901,7 +896,8 @@ const PageExecutivo = () => {
           ))}
         </div>
       </div>
-      </div>{/* close upsell-blur */}
+
+
     </div>
   );
 };
