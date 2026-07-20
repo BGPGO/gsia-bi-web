@@ -6,7 +6,10 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
-const EXCEL_PATH = 'G:/Meu Drive/BGP/CLIENTES/BI/126. GSIA FACILITIES/BASES/Abertura de Vagas (10).xlsx';
+const CONTAINER_PATH = '/app/workspace/abertura-vagas.xlsx';
+const DRIVE_PATH = 'G:/Meu Drive/BGP/CLIENTES/BI/126. GSIA FACILITIES/BASES/Abertura de Vagas (10).xlsx';
+const EXCEL_PATH = process.env.GSIA_EXCEL_PATH
+  || (fs.existsSync(CONTAINER_PATH) ? CONTAINER_PATH : DRIVE_PATH);
 
 console.log('[build-data] Lendo planilha…');
 const wb = XLSX.readFile(EXCEL_PATH, { cellDates: true });

@@ -503,12 +503,6 @@ const PageVagas = () => {
     return Object.entries(map).map(([name, d]) => ({ name, ...d, total: d.fechado + d.cancelada + d.aberto })).sort((a, b) => b.total - a.total);
   }, [filteredVagas]);
 
-  const empresaMatrizData = useMemo(() => {
-    const map = {};
-    for (const v of filteredVagas) { const e = v.empresa || 'N/A'; if (!map[e]) map[e] = { fechado: 0, cancelada: 0, aberto: 0 }; if (v.status === 'FECHADO') map[e].fechado++; else if (v.status === 'CANCELADA') map[e].cancelada++; else map[e].aberto++; }
-    return Object.entries(map).map(([name, d]) => ({ name, ...d, total: d.fechado + d.cancelada + d.aberto })).sort((a, b) => b.total - a.total);
-  }, [filteredVagas]);
-
   const cargoData = useMemo(() => {
     const map = {}; for (const v of filteredVagas) { const c = v.cargo || 'N/A'; map[c] = (map[c] || 0) + 1; }
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
@@ -529,7 +523,6 @@ const PageVagas = () => {
   const activeResp = drilldown && drilldown.type === 'responsavel' ? drilldown.value : null;
   const activeCliente = drilldown && drilldown.type === 'cliente' ? drilldown.value : null;
   const activeCargo = drilldown && drilldown.type === 'cargo' ? drilldown.value : null;
-  const activeEmpresa = drilldown && drilldown.type === 'empresa' ? drilldown.value : null;
 
   return (
     <div className="page">
@@ -555,7 +548,6 @@ const PageVagas = () => {
         <KpiTile label="Total de Clientes" value={kpis.clientes} tone="violet" />
         <KpiTile label="Tempo Médio de Fechamento" value={kpis.tempoMedio} unit="dias" tone="amber" />
       </div>
-      <div className="card"><div className="card-title">Vagas por Empresa (Status)</div><StackedHBarChart data={empresaMatrizData} onBarClick={n => toggleDrill('empresa', n)} activeName={activeEmpresa} /></div>
       <div className="grid-2">
         <div className="card"><div className="card-title">Vagas por Responsável de Abertura</div><HBarChart data={responsavelData} color="cyan" onBarClick={n => toggleDrill('responsavel', n)} activeName={activeResp} /></div>
         <div className="card"><div className="card-title">Responsável por Status (Matriz)</div><StackedHBarChart data={responsavelMatrizData} onBarClick={n => toggleDrill('responsavel', n)} activeName={activeResp} /></div>
