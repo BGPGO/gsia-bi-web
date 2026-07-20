@@ -920,6 +920,61 @@ const PageExecutivo = () => {
   );
 };
 
+// ============== NOVAS VAGAS POPUP ==============
+const NovasVagasPopup = () => {
+  const novas = window.BIT.novasVagas || [];
+  const [visible, setVisible] = useState(novas.length > 0);
+
+  if (!visible || novas.length === 0) return null;
+
+  const fmtDate = (d) => {
+    if (!d) return '-';
+    const p = d.split('-');
+    return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
+  };
+
+  return (
+    <div className="popup-overlay" onClick={() => setVisible(false)}>
+      <div className="popup-card" onClick={e => e.stopPropagation()}>
+        <div className="popup-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="popup-icon-pulse">
+              <Icon name="alert" style={{ width: 22, height: 22, color: '#fff' }} />
+            </div>
+            <div>
+              <div className="popup-title">{novas.length} nova{novas.length > 1 ? 's' : ''} vaga{novas.length > 1 ? 's' : ''} aberta{novas.length > 1 ? 's' : ''}</div>
+              <div className="popup-subtitle">Detectada{novas.length > 1 ? 's' : ''} na última atualização</div>
+            </div>
+          </div>
+          <button className="popup-close" onClick={() => setVisible(false)}>×</button>
+        </div>
+        <div className="popup-body">
+          {novas.map((v, i) => (
+            <div key={i} className="popup-vaga-item">
+              <div className="popup-vaga-row">
+                <span className="popup-vaga-cliente">{v.cliente}</span>
+                <span className={`badge-status ${v.status === 'FECHADO' ? 'fechado' : v.status === 'CANCELADA' ? 'cancelada' : 'aberto'}`}>
+                  {v.status === 'EM ABERTO' ? 'Em Aberto' : v.status === 'FECHADO' ? 'Fechado' : 'Cancelada'}
+                </span>
+              </div>
+              <div className="popup-vaga-details">
+                <span>{v.cargo}</span>
+                <span style={{ color: 'var(--mute)' }}>·</span>
+                <span>{v.responsavel}</span>
+                {v.qtdVagas > 1 && <><span style={{ color: 'var(--mute)' }}>·</span><span>{v.qtdVagas} vagas</span></>}
+              </div>
+              <div className="popup-vaga-meta">
+                <span>Abertura: {fmtDate(v.dataAbertura)}</span>
+                {v.motivo && <><span style={{ color: 'var(--mute)' }}>·</span><span>{v.motivo}</span></>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ============== APP ==============
 const App = () => {
   const [page, setPage] = useState("vagas");
@@ -931,6 +986,7 @@ const App = () => {
         {page === "vagas" && <PageVagas />}
         {page === "executivo" && <PageExecutivo />}
       </div>
+      <NovasVagasPopup />
     </div>
   );
 };

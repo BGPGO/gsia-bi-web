@@ -191,6 +191,37 @@ const BIT = {
   vagas, // dados completos pra filtros futuros
 };
 
+// === Detecção de vagas novas ===
+const snapshotPath = path.join(__dirname, 'prev-vagas.json');
+const vagaKey = (v) => `${v.dataAbertura}|${v.cliente}|${v.cargo}|${v.responsavel}|${v.qtdVagas}`;
+const currentKeys = new Set(vagas.map(vagaKey));
+
+let novasVagas = [];
+try {
+  if (fs.existsSync(snapshotPath)) {
+    const prevKeys = new Set(JSON.parse(fs.readFileSync(snapshotPath, 'utf-8')));
+    novasVagas = vagas.filter(v => !prevKeys.has(vagaKey(v)));
+    if (novasVagas.length > 0) {
+      console.log(`[build-data] ${novasVagas.length} vaga(s) nova(s) detectada(s)!`);
+      for (const nv of novasVagas) console.log(`  → ${nv.cliente} | ${nv.cargo} | ${nv.responsavel}`);
+    }
+  }
+} catch (e) {
+  console.log('[build-data] Sem snapshot anterior — primeira execução');
+}
+// Salva snapshot atual para próxima comparação
+fs.writeFileSync(snapshotPath, JSON.stringify([...currentKeys]), 'utf-8');
+
+BIT.novasVagas = novasVagas.map(v => ({
+  dataAbertura: v.dataAbertura,
+  cliente: v.cliente,
+  cargo: v.cargo,
+  responsavel: v.responsavel,
+  qtdVagas: v.qtdVagas,
+  motivo: v.motivo,
+  status: v.status,
+}));
+
 // Escreve data.js
 const outPath = path.join(__dirname, 'data.js');
 const now = new Date().toISOString();

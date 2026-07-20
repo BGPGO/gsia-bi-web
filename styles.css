@@ -668,6 +668,65 @@ table.t tr.active-row td { color: var(--cyan-2); }
 .pie-legend-item.dimmed { opacity: 0.3; }
 .pie-legend-item.active .pie-name { color: var(--cyan-2); font-weight: 600; }
 
+/* ============== NOVAS VAGAS POPUP ============== */
+.popup-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  animation: popupFadeIn 300ms ease;
+}
+@keyframes popupFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popupSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(34,211,238,0.5); } 50% { box-shadow: 0 0 0 10px rgba(34,211,238,0); } }
+
+.popup-card {
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: 16px; width: 520px; max-width: 92vw;
+  max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,211,238,0.15);
+  animation: popupSlideUp 350ms ease;
+}
+.popup-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(34,211,238,0.08), transparent);
+}
+.popup-icon-pulse {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--cyan), #0ea5e9);
+  display: flex; align-items: center; justify-content: center;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+.popup-title { font-size: 17px; font-weight: 700; color: var(--text); }
+.popup-subtitle { font-size: 12px; color: var(--mute); margin-top: 2px; }
+.popup-close {
+  width: 32px; height: 32px; border-radius: 8px; border: none;
+  background: var(--surface-3); color: var(--mute); font-size: 20px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 150ms;
+}
+.popup-close:hover { background: var(--border-2); color: var(--text); }
+.popup-body { padding: 16px 24px 24px; overflow-y: auto; }
+
+.popup-vaga-item {
+  padding: 14px 16px; border-radius: 10px; background: var(--surface-2);
+  border: 1px solid var(--border); margin-bottom: 10px;
+  transition: border-color 150ms;
+}
+.popup-vaga-item:hover { border-color: var(--cyan-dim); }
+.popup-vaga-item:last-child { margin-bottom: 0; }
+.popup-vaga-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.popup-vaga-cliente { font-size: 14px; font-weight: 700; color: var(--text); }
+.popup-vaga-details {
+  display: flex; gap: 6px; font-size: 13px; color: var(--text-2); flex-wrap: wrap;
+}
+.popup-vaga-meta {
+  display: flex; gap: 6px; font-size: 11px; color: var(--mute); margin-top: 6px; flex-wrap: wrap;
+}
+
 /* ============== RESPONSIVE ============== */
 @media (max-width: 1200px) {
   .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr; }
