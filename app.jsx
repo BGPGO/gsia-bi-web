@@ -127,17 +127,35 @@ const Sidebar = ({ active, onSelect }) => {
 };
 
 // ============== HEADER ==============
-const Header = ({ page }) => (
-  <header className="header">
-    <div className="breadcrumb">
-      <span>GSIA Facilities</span>
-      <Icon name="chevronRight" style={{ width: 12, height: 12 }} />
-      <span>BI RH</span>
-      <Icon name="chevronRight" style={{ width: 12, height: 12 }} />
-      <b>{PAGE_LABELS[page] || 'Controle de Vagas'}</b>
-    </div>
-  </header>
-);
+const Header = ({ page }) => {
+  const dataAtual = useMemo(() => {
+    // Tenta pegar do comentário do data.js via fetch síncrono do cache
+    // Fallback: exibe a data do window.BIT_UPDATED se existir
+    if (window.BIT_UPDATED) {
+      const d = new Date(window.BIT_UPDATED);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+    return null;
+  }, []);
+
+  return (
+    <header className="header">
+      <div className="breadcrumb">
+        <span>GSIA Facilities</span>
+        <Icon name="chevronRight" style={{ width: 12, height: 12 }} />
+        <span>BI RH</span>
+        <Icon name="chevronRight" style={{ width: 12, height: 12 }} />
+        <b>{PAGE_LABELS[page] || 'Controle de Vagas'}</b>
+      </div>
+      {dataAtual && (
+        <div style={{ fontSize: 12, color: 'var(--mute)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Icon name="clock" style={{ width: 14, height: 14 }} />
+          <span>Atualizado em: <b style={{ color: 'var(--text-2)' }}>{dataAtual}</b></span>
+        </div>
+      )}
+    </header>
+  );
+};
 
 // ============== KPI TILE ==============
 const KpiTile = ({ label, value, unit, tone, subtitle }) => (
