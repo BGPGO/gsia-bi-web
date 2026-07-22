@@ -443,6 +443,9 @@ const useFilteredVagas = (opts = {}) => {
   const [mes, setMes] = useState(0);
   const [ano, setAno] = useState(0);
   const [drilldown, setDrilldown] = useState(null);
+  const [clienteFilter, setClienteFilter] = useState('');
+  const [dataInicio, setDataInicio] = useState('');
+  const [dataFinal, setDataFinal] = useState('');
 
   const toggleDrill = (type, value) => {
     setDrilldown(prev => (prev && prev.type === type && prev.value === value) ? null : { type, value });
@@ -454,8 +457,17 @@ const useFilteredVagas = (opts = {}) => {
     return [...years].sort();
   }, [D.vagas]);
 
+  const availableClientes = useMemo(() => {
+    const set = new Set();
+    for (const v of D.vagas) { if (v.cliente) set.add(v.cliente); }
+    return [...set].sort();
+  }, [D.vagas]);
+
   const filteredVagas = useMemo(() => {
     let result = D.vagas;
+    if (clienteFilter) result = result.filter(v => v.cliente === clienteFilter);
+    if (dataInicio) result = result.filter(v => v.dataAbertura && v.dataAbertura >= dataInicio);
+    if (dataFinal) result = result.filter(v => v.dataAbertura && v.dataAbertura <= dataFinal);
     if (ano > 0) result = result.filter(v => v.dataAbertura && Number(v.dataAbertura.slice(0, 4)) === ano);
     if (mes > 0) result = result.filter(v => v.dataAbertura && Number(v.dataAbertura.slice(5, 7)) === mes);
     if (statusFilter !== 'todos') {
@@ -471,9 +483,9 @@ const useFilteredVagas = (opts = {}) => {
       else if (drilldown.type === 'semaforo') result = result.filter(v => getSemaforo(v) === drilldown.value);
     }
     return result;
-  }, [statusFilter, mes, ano, drilldown, D.vagas]);
+  }, [statusFilter, mes, ano, drilldown, clienteFilter, dataInicio, dataFinal, D.vagas]);
 
-  return { D, filteredVagas, statusFilter, setStatusFilter, mes, setMes, ano, setAno, drilldown, setDrilldown, toggleDrill, availableYears };
+  return { D, filteredVagas, statusFilter, setStatusFilter, mes, setMes, ano, setAno, drilldown, setDrilldown, toggleDrill, availableYears, clienteFilter, setClienteFilter, dataInicio, setDataInicio, dataFinal, setDataFinal, availableClientes };
 };
 
 // ====================================================
@@ -565,7 +577,7 @@ const PageVagas = () => {
 // PAGE 2: DASHBOARD EXECUTIVO
 // ====================================================
 const PageExecutivo = () => {
-  const { D, filteredVagas, statusFilter, setStatusFilter, mes, setMes, ano, setAno, drilldown, setDrilldown, toggleDrill, availableYears } = useFilteredVagas();
+  const { D, filteredVagas, statusFilter, setStatusFilter, mes, setMes, ano, setAno, drilldown, setDrilldown, toggleDrill, availableYears, clienteFilter, setClienteFilter, dataInicio, setDataInicio, dataFinal, setDataFinal, availableClientes } = useFilteredVagas();
 
   // === 1. KPIs Executivos ===
   const kpis = useMemo(() => {
@@ -729,6 +741,31 @@ const PageExecutivo = () => {
           <DateFilter mes={mes} setMes={setMes} ano={ano} setAno={setAno} availableYears={availableYears} />
         </div>
       </div>
+
+      {/* Filtro por Cliente + Período */}
+      <div className="cliente-period-filter">
+        <div className="cpf-group">
+          <label className="cpf-label">Cliente</label>
+          <select className="filter-select" value={clienteFilter} onChange={e => setClienteFilter(e.target.value)} style={{ minWidth: 220 }}>
+            <option value="">Todos os clientes</option>
+            {availableClientes.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="cpf-group">
+          <label className="cpf-label">Data Início</label>
+          <input type="date" className="filter-date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
+        </div>
+        <div className="cpf-group">
+          <label className="cpf-label">Data Final</label>
+          <input type="date" className="filter-date" value={dataFinal} onChange={e => setDataFinal(e.target.value)} />
+        </div>
+        {(clienteFilter || dataInicio || dataFinal) && (
+          <button className="cpf-clear" onClick={() => { setClienteFilter(''); setDataInicio(''); setDataFinal(''); }}>
+            <Icon name="xCircle" style={{ width: 14, height: 14 }} /> Limpar filtros
+          </button>
+        )}
+      </div>
+
       <DrilldownBadge drilldown={drilldown} onClear={() => setDrilldown(null)} />
 
       {/* 1. KPIs Executivos */}
