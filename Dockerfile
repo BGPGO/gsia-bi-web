@@ -1,5 +1,6 @@
 FROM nginx:alpine
 
+# build 2026-07-22-v2
 # Node 20 + cron + ferramentas minimas pro ETL diario
 RUN apk add --no-cache nodejs npm dcron tini ca-certificates curl \
  && mkdir -p /app /var/log
