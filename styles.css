@@ -767,6 +767,8 @@ table.t tr.active-row td { color: var(--cyan-2); }
   transition: border-color 150ms;
 }
 .popup-vaga-item:hover { border-color: var(--cyan-dim); }
+.popup-vaga-nova { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+.popup-vaga-nova:hover { border-color: #f59e0b; }
 .popup-vaga-item:last-child { margin-bottom: 0; }
 .popup-vaga-row {
   display: flex; align-items: center; justify-content: space-between;

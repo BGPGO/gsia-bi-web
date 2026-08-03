@@ -957,18 +957,36 @@ const PageExecutivo = () => {
   );
 };
 
-// ============== NOVAS VAGAS POPUP ==============
-const NovasVagasPopup = () => {
+// ============== ALERTA DE VAGAS EM ABERTO ==============
+const AlertaVagasPopup = () => {
   const novas = window.BIT.novasVagas || [];
-  const [visible, setVisible] = useState(novas.length > 0);
+  const abertas = (window.BIT.vagas || []).filter(v => v.status === 'EM ABERTO');
+  const [visible, setVisible] = useState(abertas.length > 0);
+  const [tab, setTab] = useState('abertas');
 
-  if (!visible || novas.length === 0) return null;
+  const novasKeys = useMemo(() => {
+    return new Set(novas.map(v => `${v.dataAbertura}|${v.cliente}|${v.cargo}|${v.responsavel}`));
+  }, [novas]);
+
+  const isNova = (v) => novasKeys.has(`${v.dataAbertura}|${v.cliente}|${v.cargo}|${v.responsavel}`);
+
+  // Novas que estão em aberto
+  const novasAbertas = abertas.filter(v => isNova(v));
+
+  if (!visible || abertas.length === 0) return null;
 
   const fmtDate = (d) => {
     if (!d) return '-';
     const p = d.split('-');
     return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
   };
+
+  const diasAberta = (d) => {
+    if (!d) return '?';
+    return Math.max(0, Math.round((new Date() - new Date(d)) / 86400000));
+  };
+
+  const lista = tab === 'novas' ? novasAbertas : abertas;
 
   return (
     <div className="popup-overlay" onClick={() => setVisible(false)}>
@@ -979,19 +997,56 @@ const NovasVagasPopup = () => {
               <Icon name="alert" style={{ width: 22, height: 22, color: '#fff' }} />
             </div>
             <div>
-              <div className="popup-title">{novas.length} nova{novas.length > 1 ? 's' : ''} vaga{novas.length > 1 ? 's' : ''} aberta{novas.length > 1 ? 's' : ''}</div>
-              <div className="popup-subtitle">Detectada{novas.length > 1 ? 's' : ''} na última atualização</div>
+              <div className="popup-title">{abertas.length} vaga{abertas.length > 1 ? 's' : ''} em aberto</div>
+              <div className="popup-subtitle">
+                {novasAbertas.length > 0
+                  ? `${novasAbertas.length} nova${novasAbertas.length > 1 ? 's' : ''} detectada${novasAbertas.length > 1 ? 's' : ''} na última atualização`
+                  : 'Nenhuma vaga nova na última atualização'}
+              </div>
             </div>
           </div>
           <button className="popup-close" onClick={() => setVisible(false)}>×</button>
         </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', padding: '0 20px' }}>
+          <button
+            onClick={() => setTab('abertas')}
+            style={{
+              padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              background: 'none', border: 'none', color: tab === 'abertas' ? 'var(--cyan)' : 'var(--mute)',
+              borderBottom: tab === 'abertas' ? '2px solid var(--cyan)' : '2px solid transparent',
+            }}
+          >
+            Todas em Aberto ({abertas.length})
+          </button>
+          {novasAbertas.length > 0 && (
+            <button
+              onClick={() => setTab('novas')}
+              style={{
+                padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                background: 'none', border: 'none', color: tab === 'novas' ? '#f59e0b' : 'var(--mute)',
+                borderBottom: tab === 'novas' ? '2px solid #f59e0b' : '2px solid transparent',
+              }}
+            >
+              Novas ({novasAbertas.length})
+            </button>
+          )}
+        </div>
+
         <div className="popup-body">
-          {novas.map((v, i) => (
-            <div key={i} className="popup-vaga-item">
+          {lista.length === 0 && (
+            <div style={{ color: 'var(--mute)', padding: 20, textAlign: 'center' }}>Nenhuma vaga nova nesta atualização</div>
+          )}
+          {lista.map((v, i) => (
+            <div key={i} className={`popup-vaga-item${isNova(v) ? ' popup-vaga-nova' : ''}`}>
               <div className="popup-vaga-row">
-                <span className="popup-vaga-cliente">{v.cliente}</span>
-                <span className={`badge-status ${v.status === 'FECHADO' ? 'fechado' : v.status === 'CANCELADA' ? 'cancelada' : 'aberto'}`}>
-                  {v.status === 'EM ABERTO' ? 'Em Aberto' : v.status === 'FECHADO' ? 'Fechado' : 'Cancelada'}
+                <span className="popup-vaga-cliente">
+                  {isNova(v) && <span style={{ background: '#f59e0b', color: '#000', fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 4, marginRight: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nova</span>}
+                  {v.cliente}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: diasAberta(v.dataAbertura) > 5 ? 'var(--red)' : 'var(--amber)' }}>
+                  {diasAberta(v.dataAbertura)}d aberta
                 </span>
               </div>
               <div className="popup-vaga-details">
@@ -1023,7 +1078,7 @@ const App = () => {
         {page === "vagas" && <PageVagas />}
         {page === "executivo" && <PageExecutivo />}
       </div>
-      <NovasVagasPopup />
+      <AlertaVagasPopup />
     </div>
   );
 };
