@@ -35,6 +35,7 @@ for (const row of raw) {
   const sexo = row['Sexo'] || '';
   const perfil = row['Perfil / Requisitos'] || '';
   const responsavel = row['Responsável Pela Abertura'] || '';
+  const recrutador = row['Recrutador Responsável'] || '';
   const prazoFechamento = row['Prazo de Fechamento'];
   const dataFechamento = row['Data de Fechamento'];
   const statusRaw = (row['Status'] || '').toString().trim().toUpperCase();
@@ -80,6 +81,7 @@ for (const row of raw) {
       sexo,
       perfil,
       responsavel,
+      recrutador,
       prazoFechamento: fmtDate(prazoFechamento),
       dataFechamento: fmtDate(dataFechamento),
       status,

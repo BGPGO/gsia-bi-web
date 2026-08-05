@@ -711,7 +711,34 @@ const PageExecutivo = () => {
   }, [filteredVagas]);
   const totalDiasDescobertos = postosDescobertos.reduce((s, p) => s + p.diasDescoberto, 0);
 
-  // === 10. Qualidade dos Dados ===
+  // === 10. Produtividade por Recrutador ===
+  const recrutadorData = useMemo(() => {
+    const map = {};
+    for (const v of filteredVagas) {
+      const r = v.recrutador || '';
+      if (!r) continue;
+      if (!map[r]) map[r] = { fechadas: 0, abertas: 0, canceladas: 0, diasTotal: 0, diasCount: 0 };
+      if (v.status === 'FECHADO') {
+        map[r].fechadas++;
+        if (v.diasFechamento != null) { map[r].diasTotal += v.diasFechamento; map[r].diasCount++; }
+      } else if (v.status === 'CANCELADA') {
+        map[r].canceladas++;
+      } else {
+        map[r].abertas++;
+      }
+    }
+    return Object.entries(map).map(([name, d]) => ({
+      name,
+      fechadas: d.fechadas,
+      abertas: d.abertas,
+      canceladas: d.canceladas,
+      total: d.fechadas + d.abertas + d.canceladas,
+      tempoMedio: d.diasCount > 0 ? Math.round(d.diasTotal / d.diasCount) : '-',
+      taxaSucesso: (d.fechadas + d.abertas + d.canceladas) > 0 ? Math.round((d.fechadas / (d.fechadas + d.abertas + d.canceladas)) * 100) : 0,
+    })).sort((a, b) => b.fechadas - a.fechadas);
+  }, [filteredVagas]);
+
+  // === 11. Qualidade dos Dados ===
   const qualidadeData = useMemo(() => {
     const campos = ['cliente', 'cargo', 'escala', 'motivo', 'responsavel', 'prazoFechamento', 'perfil'];
     const labels = ['Cliente', 'Cargo', 'Escala', 'Motivo', 'Responsável', 'Prazo Fechamento', 'Perfil'];
@@ -933,7 +960,52 @@ const PageExecutivo = () => {
         ) : <div style={{ color: 'var(--green)', padding: 20, textAlign: 'center', fontWeight: 600 }}>Nenhum posto descoberto no período</div>}
       </div>
 
-      {/* 10. Qualidade dos Dados */}
+      {/* 10. Produtividade por Recrutador */}
+      {recrutadorData.length > 0 && (
+        <div className="card">
+          <div className="card-title">Produtividade por Recrutador</div>
+          <div className="t-scroll" style={{ maxHeight: 400 }}>
+            <table className="t">
+              <thead>
+                <tr>
+                  <th>Recrutador</th>
+                  <th className="num">Fechadas</th>
+                  <th className="num">Em Aberto</th>
+                  <th className="num">Canceladas</th>
+                  <th className="num">Total</th>
+                  <th className="num">Tempo Médio</th>
+                  <th className="num">Taxa Sucesso</th>
+                  <th style={{ width: '25%' }}>Desempenho</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recrutadorData.map((r, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: 600 }}>{r.name}</td>
+                    <td className="num" style={{ color: 'var(--green)', fontWeight: 700 }}>{r.fechadas}</td>
+                    <td className="num" style={{ color: 'var(--amber)' }}>{r.abertas}</td>
+                    <td className="num" style={{ color: 'var(--red)' }}>{r.canceladas}</td>
+                    <td className="num" style={{ fontWeight: 700 }}>{r.total}</td>
+                    <td className="num">{r.tempoMedio !== '-' ? r.tempoMedio + 'd' : '-'}</td>
+                    <td className="num">
+                      <span style={{ color: r.taxaSucesso >= 70 ? 'var(--green)' : r.taxaSucesso >= 40 ? 'var(--amber)' : 'var(--red)', fontWeight: 700 }}>{r.taxaSucesso}%</span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ flex: 1, height: 8, background: 'var(--surface-3)', borderRadius: 4, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${r.taxaSucesso}%`, background: r.taxaSucesso >= 70 ? 'var(--green)' : r.taxaSucesso >= 40 ? 'var(--amber)' : 'var(--red)', borderRadius: 4, transition: 'width 300ms' }} />
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 11. Qualidade dos Dados */}
       <div className="card">
         <div className="card-title">Padronização de Dados — Preenchimento Obrigatório</div>
         <div className="quality-grid">
